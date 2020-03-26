@@ -27,5 +27,5 @@ node_modules/
 # IDE configurations
 .vscode/
 
-# Notes
-notes.md
+# Bash
+runMongo.sh
