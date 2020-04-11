@@ -11,7 +11,15 @@ const TaskSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  owner: {
+    type: mongoose.Schema.ObjectId,
+    required: true,
+    ref: 'User',
+  },
 })
+
+
+TaskSchema.set('toObject', { virtuals: true })
 
 TaskSchema.pre('save', async function(next) {
   const task = this
