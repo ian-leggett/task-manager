@@ -50,6 +50,8 @@ const UserSchema = new mongoose.Schema({
       },
     },
   ],
+}, {
+  timestamps: true,
 })
 
 UserSchema.set('toObject', { virtuals: true })
