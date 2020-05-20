@@ -1,6 +1,7 @@
 const express = require('express')
 const User = require('../models/user')
 const auth = require('../middleware/auth')
+const upload = require('../middleware/upload')
 
 const router = new express.Router()
 const { allowedUpdates } = require('../helpers')
@@ -52,7 +53,6 @@ router.get('/users/me', auth, async (req, res) => {
   res.send(req.user)
 })
 
-
 router.patch('/users/me', auth, async (req, res) => {
   const updates = Object.keys(req.body)
   const isValidOperation = allowedUpdates(updates, [
@@ -81,6 +81,26 @@ router.delete('/users/me', auth, async (req, res) => {
   } catch (e) {
     res.status(500).send(e)
   }
+})
+
+router.post(
+  '/users/me/avatar',
+  auth,
+  upload.single('avatar'),
+  async (req, res) => {
+    req.user.avatar = req.file.buffer
+    await req.user.save()
+    res.send(200)
+  },
+  (error, req, res, next) => {
+    res.status(400).send({ error: error.message })
+  }
+)
+
+router.delete('/users/me/avatar', auth, async (req, res) => {
+  req.user.avatar = undefined
+  await req.user.save()
+  res.send(200)
 })
 
 module.exports = router
