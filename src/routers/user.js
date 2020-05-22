@@ -1,4 +1,5 @@
 const express = require('express')
+const sharp = require('sharp')
 const User = require('../models/user')
 const auth = require('../middleware/auth')
 const upload = require('../middleware/upload')
@@ -88,7 +89,15 @@ router.post(
   auth,
   upload.single('avatar'),
   async (req, res) => {
-    req.user.avatar = req.file.buffer
+    const buffer = await sharp(req.file.buffer)
+      .resize({
+        width: 250,
+        height: 250,
+      })
+      .png()
+      .toBuffer()
+      req.user.avatar = buffer
+
     await req.user.save()
     res.send(200)
   },
@@ -101,6 +110,19 @@ router.delete('/users/me/avatar', auth, async (req, res) => {
   req.user.avatar = undefined
   await req.user.save()
   res.send(200)
+})
+
+router.get('/users/:id/avatar', async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id)
+    if (!user || !user.avatar) {
+      throw new Error()
+    }
+    res.set('Content-Type', 'image/png')
+    res.send(user.avatar)
+  } catch (error) {
+    res.status(400).send()
+  }
 })
 
 module.exports = router
