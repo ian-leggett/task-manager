@@ -4,9 +4,13 @@
   "description": "",
   "main": "src/db/mongoose.js",
   "scripts": {
-    "start": "node src/index.js",
+    "start": "env-cmd -f ./config/dev.env node src/index.js",
     "dev": "env-cmd -f ./config/dev.env nodemon src/index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "env-cmd -f ./config/test.env jest",
+    "test:watch": "env-cmd -f ./config/test.env jest --watch"
+  },
+  "jest": {
+    "testEnvironment": "node"
   },
   "keywords": [],
   "author": "",
@@ -26,7 +30,9 @@
   "devDependencies": {
     "env-cmd": "^10.1.0",
     "eslint-plugin-prettier": "^3.1.2",
+    "jest": "^26.0.1",
     "nodemon": "^2.0.2",
-    "prettier": "^1.19.1"
+    "prettier": "^1.19.1",
+    "supertest": "^4.0.2"
   }
 }
