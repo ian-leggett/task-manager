@@ -1,27 +1,12 @@
 const request = require('supertest')
-const jwt = require('jsonwebtoken')
-const mongoose = require('mongoose')
 const app = require('../src/app')
+const mongoose = require('mongoose')
 const User = require('../src/models/user')
+const { userOne, userOneId, setupDatabase, closeConnection } = require('./fixtures/db')
 
-const userOneId = new mongoose.Types.ObjectId()
+beforeEach(setupDatabase)
 
-const userOne = {
-  _id: userOneId,
-  name: 'mike',
-  email: 'mike@mike.com',
-  password: 'MyPass567!',
-  tokens: [
-    {
-      token: jwt.sign({ _id: userOneId }, process.env.JWT_SECRET),
-    },
-  ],
-}
-
-beforeEach(async () => {
-  await User.deleteMany()
-  await new User(userOne).save()
-})
+// afterAll(closeConnection)
 
 test('Should sign up a new user', async () => {
   const response = await request(app)
@@ -53,7 +38,7 @@ test('should login existing user', async () => {
   expect(response.body.token).toBe(user.tokens[1].token)
 })
 
-test('should not login unknown user', async () => {
+test('should NOT login unknown user', async () => {
   await request(app)
     .post('/users/login')
     .send({
@@ -96,4 +81,36 @@ test('Should NOT delete account for user', async () => {
     .set('Authorization', `Bearer notavalidtoken`)
     .send()
     .expect(401)
+})
+
+test('should upload avatar image', async () => {
+  await request(app)
+    .post('/users/me/avatar')
+    .set('Authorization', `Bearer ${userOne.tokens[0].token}`)
+    .attach('avatar', 'tests/fixtures/profile-pic.jpg')
+    .expect(200)
+  const user = await User.findById(userOneId)
+  expect(user.avatar).toEqual(expect.any(Buffer))
+})
+
+test('should update a user', async () => {
+  await request(app)
+    .patch('/users/me')
+    .set('Authorization', `Bearer ${userOne.tokens[0].token}`)
+    .send({
+      name: 'ian',
+    })
+    .expect(200)
+  const user = await User.findById(userOneId)
+  expect(user.name).toEqual('ian')
+})
+
+test('should NOT update invalid user field', async () => {
+  await request(app)
+    .patch('/users/me')
+    .set('Authorization', `Bearer ${userOne.tokens[0].token}`)
+    .send({
+      location: 'London',
+    })
+    .expect(400)
 })

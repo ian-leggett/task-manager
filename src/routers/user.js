@@ -102,7 +102,7 @@ router.post(
     req.user.avatar = buffer
 
     await req.user.save()
-    res.send(200)
+    res.sendStatus(200)
   },
   (error, req, res, next) => {
     res.status(400).send({ error: error.message })
@@ -112,7 +112,7 @@ router.post(
 router.delete('/users/me/avatar', auth, async (req, res) => {
   req.user.avatar = undefined
   await req.user.save()
-  res.send(200)
+  res.sendStatus(200)
 })
 
 router.get('/users/:id/avatar', async (req, res) => {
