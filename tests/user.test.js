@@ -6,7 +6,7 @@ const { userOne, userOneId, setupDatabase, closeConnection } = require('./fixtur
 
 beforeEach(setupDatabase)
 
-// afterAll(closeConnection)
+afterAll(closeConnection)
 
 test('Should sign up a new user', async () => {
   const response = await request(app)
